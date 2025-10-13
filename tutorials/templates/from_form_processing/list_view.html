@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Profile Pic</th>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>email</th>
+        </tr>
+        {% for user in profiles %}
+        <tr>
+            <td>
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" width="100">
+                {% else %}
+                    No Image
+                {% endif %}
+            </td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

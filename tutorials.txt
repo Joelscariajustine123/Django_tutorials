@@ -1,0 +1,415 @@
+<-------------------------- Virtual Environment-------------------------------->
+
+bash:
+     python -m venv {Environment_name}
+
+
+bash:
+    env\Scripts\activate
+
+bash:
+    pip install django
+
+
+<--------------------------- Project and app Setup ----------------------------->
+
+bash:
+    django-admin startproject {Project_name}
+
+bash:
+    cd {Project_name}
+
+bash:
+    django-admin startapp {app_name}          or            python manage.py startapp {app_name}
+
+
+
+{Project_name}/Settings.py:
+                            INSTALLED_APPS = [
+                                'django.contrib.admin',
+                                'django.contrib.auth',
+                                'django.contrib.contenttypes',
+                                'django.contrib.sessions',
+                                'django.contrib.messages',
+                                'django.contrib.staticfiles',
+                                '{app_name}'
+                            ]
+
+{Project_name}/urls.py:
+                        from django.urls import path,include
+
+                        urlpatterns = [
+                            path('admin/', admin.site.urls),
+                            path('{app_name}/',include("{app_name}.urls"))
+                        ]
+
+add urls.py file in {app_name} folder:
+                            from django.urls import path
+                            from .views import *
+                            urlpatterns = [
+                                path("",home,name="home"),
+                            ]
+
+
+{app_name}/views.py:
+
+                    from django.http import HttpResponse
+                    from django.shortcuts import render
+
+                    def home(request):
+                        return HttpResponse("Hello, Django!")
+
+
+
+<-------------------------Run the Project---------------------------->
+
+bash:
+    python manage.py runserver
+
+
+
+
+
+<-------------------------   template rendering -------------------->
+
+{app_name}/views.py:
+
+    def second(request):
+        return render(request, 'second.html')
+
+{Project_name}/templates/second.html:
+
+                create an html page
+
+{Project_name}/Settings.py:
+
+                import os
+                TEMPLATES = [
+                    {
+                        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+                        'APP_DIRS': True,
+                        'OPTIONS': {
+                            'context_processors': [
+                                'django.template.context_processors.request',
+                                'django.contrib.auth.context_processors.auth',
+                                'django.contrib.messages.context_processors.messages',
+                            ],
+                        },
+                    },
+                ]               
+
+
+<---------------------- Model Setup / Database Setup ------------->
+
+{app_name}/models.py:
+
+                from django.db import models
+
+                class ExampleModel(models.Model):
+                    name=models.CharField(max_length=100)
+                    age=models.IntegerField()
+
+                    def __str__(self):
+                        return self.name
+
+bash:
+    python manage.py makemigrations
+
+bash:
+    python manage.py migrate
+
+
+{app_name}/views.py:
+
+                    from .models import User_details
+
+                    def user_details(request):
+                        users = User_details.objects.all()
+                        return render(request, 'user_details.html', {'users': users})
+
+
+template/user_details.html:
+
+                        <html>
+                            <head>
+                                <title>Users</title>
+                            </head>
+                            <body>
+                                {% for user in users %}
+                                    <h2>name: {{ user.name }}</h2>
+                                    <p>Age: {{ user.age }}</p>
+                                {% endfor %}
+                            </body>
+                        </html>
+
+<--------------------------- admin Panel --------------------->
+
+{app_name}/admin.py:
+
+                from django.contrib import admin
+                from .models import User_details
+
+                admin.site.register(User_details)    
+
+bash:
+    python manage.py createsuperuser
+
+in url add "/admin" the enter username & password.
+
+
+<----------------------  static files ------------------------->
+
+{Project_name}/Settings.py:
+
+                STATIC_URL = '/static/'  
+
+                STATICFILES_DIRS = [
+                    BASE_DIR / 'static',
+                ]
+                MEDIA_URL = '/media/'  
+                MEDIA_ROOT = BASE_DIR / 'media'
+
+
+{Project_name}/urls.py:
+
+                from django.conf import settings
+                from django.conf.urls.static import static  
+
+                urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+create  2 folders named one as static and other as media.Inside static we add files like css,js, static images etc where as in media we put documents from our Database.
+
+any html file:
+
+            {% load static %}
+            <html>
+                <head>
+                    <title>Users</title>
+                    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+                </head>
+                <body>
+                    {% for user in users %}
+                        <h2>name: {{ user.name }}</h2>
+                        <p>Age: {{ user.age }}</p>
+                        {% if user.profile_pic %}
+                            <img src="{{ user.profile_pic.url }}" alt="{{ user.name }}'s Profile Picture" width="200">
+                        {% else %}
+                            <p>No profile picture available.</p>
+                        {% endif %}
+                    {% endfor %}
+                </body>
+            </html>
+
+{app_name}/models.py:
+
+                from django.db import models
+
+                # Create your models here.
+                class User_details(models.Model):
+                    name=models.CharField(max_length=100)
+                    age=models.IntegerField()
+                    profile_pic=models.ImageField(upload_to='profile_pics/',null=True,blank=True)
+
+                    def __str__(self):
+                        return self.name
+
+
+
+
+<------------------  change database to MySQL -------------->
+
+bash:
+    pip install mysqlclient
+
+{Project_name}/settings.py:
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'myprojectdb',
+        'USER': 'django_user',  #change user
+        'PASSWORD': 'mypassword', # change password
+        'HOST': 'localhost',     
+        'PORT': '3306',          
+        
+    }
+}
+
+bash:
+    python manage.py makemigrations
+
+bash:
+    python manage.py migrate
+
+<-------------------- value passing -------------------->
+
+{app_name}/views.py:
+
+                def third(request):
+                    a="hello welcome to django"
+                    return render(request, 'third.html', {'a': a})
+
+template/third.html:
+            <html>
+            <head>
+                <title>Third</title>
+            </head>
+            <body>
+                <h1>This is the third template</h1>
+                <h1>{{a}}</h1>
+            </body>
+            </html>
+
+<----------------- form processing ------------------------>
+
+{app_name}/models.py:
+
+                from django.db import models
+
+                # Create your models here.
+                class UserProfile(models.Model):
+                    first_name = models.CharField(max_length=30)
+                    last_name = models.CharField(max_length=30)
+                    email = models.EmailField(unique=True)
+                    profile_picture = models.ImageField(upload_to='form_process/profile_pics/', null=True, blank=True)
+
+
+                    def __str__(self):
+                        return f"{self.first_name} {self.last_name}"
+
+{app_name}/forms.py:
+
+            from django.forms import ModelForm
+
+            from .models import UserProfile
+
+            class UserProfileForm(ModelForm):
+                class Meta:
+                    model = UserProfile
+                    fields = ['first_name', 'last_name', 'email', 'profile_picture']
+
+{app_name}/views.py:
+
+                from django.shortcuts import redirect, render
+                from .forms import UserProfileForm
+                from .models import UserProfile
+                # Create your views here.
+                def user_profile_view(request):
+                    if request.method == 'POST':
+                        form = UserProfileForm(request.POST, request.FILES)
+                        if form.is_valid():
+                            form.save()
+                            return redirect('list_view')
+                        form = UserProfileForm()
+                    
+                    return render(request, 'from_form_processing/user_profile.html', {'form': form})
+
+                def list_view(request):
+                    profiles = UserProfile.objects.all()
+                    return render(request, 'from_form_processing/list_view.html', {'profiles': profiles})
+
+{app_name}/urls.py:
+
+                urlpatterns  = [
+                    path('', user_profile_view, name='user_profile'),
+                    path('list/', list_view, name='list_view'),
+                ]
+
+template/{app_name}/user_profile.html:
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>User Details</title>
+                </head>
+                <body>
+                    <h1>User details</h1>
+                    <form action="" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit">Submit</button>
+                    </form>
+                </body>
+                </html>
+
+
+template/{app_name}/list_view:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Profile Pic</th>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>email</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" width="100">
+                {% else %}
+                    No Image
+                {% endif %}
+            </td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
+
+
+<------------------------- message passing --------------------->
+
+{app_name}/views.py:
+
+                from django.contrib import messages
+
+                def message_view(request):
+                    messages.success(request, 'This is a success message.')
+                    messages.error(request, 'This is an error message.')
+                    messages.warning(request, 'This is a warning message.')
+                    return render(request, 'from_form_processing/message_view.html')
+
+template/{app_name}/message_view.html:
+
+                <html>
+                <head>
+                    <title>Message Passing</title>
+                </head>
+                <body>
+                    {%% if messages %%}
+                        <ul>
+                            {%% for message in messages %%}
+                                <li>{{ message }}</li>
+                            {%% endfor %%}
+                        </ul>
+                    {%% endif %%}
+                </body>
+                </html>
+
+
+<-------------------------------- login / logout & authentication ------------------------------------ >
+
+{Project_name}/settings.py:
+
+            # Redirects after login/logout
+            LOGIN_REDIRECT_URL = 'home'       # or any view name
+            LOGOUT_REDIRECT_URL = 'login'
+
+            # Path to the login page for @login_required
+            LOGIN_URL = 'login'
+
