@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'begin',
     'from_form_processing',
+    'accounts',
     # 'account',
 ]
 
@@ -53,6 +54,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'tutorials.urls'
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 
 import os
 TEMPLATES = [
