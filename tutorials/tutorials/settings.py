@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'begin',
     'from_form_processing',
     'accounts',
+    'rest_framework',
+    'api.apps.ApiConfig',
     # 'account',
 ]
 
